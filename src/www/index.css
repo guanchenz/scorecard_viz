@@ -1,0 +1,101 @@
+.root {
+  display: grid;
+  grid-template-columns: 60% auto;
+  grid-template-rows: 80px auto; /*calc(100vh - 80px - 20px - 5px)*/
+  grid-gap: 10px;
+  height: 80vh;
+  width: 100%;
+}
+
+.header {
+  grid-column: 1 / 3;
+  grid-row: 1 / 2;
+}
+
+.map {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+#map-svg {
+  margin-top: 5px;
+}
+
+.charts {
+  grid-column: 2 / 3;
+  grid-row: 2 / 3;
+
+  height: 100%;
+  width: 100%;
+  grid-template-columns: auto;
+  grid-template-rows: 280px 100px 100px 100px;
+  grid-gap: 10px;
+}
+
+.chart-1 {
+  grid-column: 1 / 2;
+  grid-row: 1 / 2;
+}
+
+.chart-2 {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+.chart-3 {
+  grid-column: 1 / 2;
+  grid-row: 3 / 4;
+}
+.chart-4 {
+  grid-column: 1 / 2;
+  grid-row: 4 / 5;
+}
+
+#title {
+  height: 30px;
+}
+
+#inputState {
+  display: none;
+}
+
+
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+.feature {
+  fill: #ccc;
+  cursor: pointer;
+}
+
+.feature.active {
+  fill: orange;
+}
+
+.mesh {
+  fill: none;
+  stroke: #fff;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 70px;
+  height: 60px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: white;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+.line {
+  fill: none;
+  stroke: grey;
+  stroke-width: 1px;
+  stroke-opacity: 0.2;
+}

@@ -30,3 +30,22 @@ data_cleaned <- data_filtered %>%
   mutate(lon = longs,
          lat = lats) %>%
   drop_na()
+
+get_year <- Vectorize(function(x) {
+  if (x == 'mn_earn_wne_p6') {
+    return(6)
+  } else if (x == 'mn_earn_wne_p7') {
+    return(7)
+  } else if (x == 'mn_earn_wne_p8') {
+    return(8)
+  } else if (x == 'mn_earn_wne_p9') {
+    return(9)
+  } else if (x == 'mn_earn_wne_p10') {
+    return(10)
+  }
+})
+
+data_gathered <- data_cleaned %>%
+  gather(`mn_earn_wne_p6`, `mn_earn_wne_p7`, `mn_earn_wne_p8`,
+         `mn_earn_wne_p9`, `mn_earn_wne_p10`, key = "year", value = "earning") %>%
+  mutate(year = get_year(year))
