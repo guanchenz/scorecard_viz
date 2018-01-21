@@ -37,6 +37,19 @@
         stroke-linejoin: round;
       }
 
+      div.tooltip {
+       	position: absolute;
+      	text-align: center;
+      	width: 70px;
+      	height: 60px;
+      	padding: 2px;
+      	font: 12px sans-serif;
+      	background: white;
+      	border: 0px;
+      	border-radius: 8px;
+      	pointer-events: none;
+      }
+
   </style>
 </head>
 
@@ -116,142 +129,202 @@
   <button id="search-state">search</button>
 
   <script>
-      // const URL = "https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/us.json";
-      // const URL_STATES = "https://gist.githubusercontent.com/mbostock/4090846/raw/07e73f3c2d21558489604a0bc434b3a5cf41a867/us-state-names.tsv";
-      const URL = "./data/us.json";
-      const URL_STATES = "./data/us-state-names.tsv";
-      var width = 960,
-      height = 500,
-      active = d3.select(null);
+      function getCities(data) {
+        console.log(data);
+        var locs = data.INSTNM.map((d, idx) => (
+          {
+            coords: [data.lon[idx], data.lat[idx]],
+            name: d
+          }
+        ))
+        console.log(locs)
+        // const URL = "https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/us.json";
+        // const URL_STATES = "https://gist.githubusercontent.com/mbostock/4090846/raw/07e73f3c2d21558489604a0bc434b3a5cf41a867/us-state-names.tsv";
+        const URL = "./data/us.json";
+        const URL_STATES = "./data/us-state-names.tsv";
+        var width = 960,
+        height = 500,
+        active = d3.select(null);
 
-      var projection = d3.geoAlbersUsa()
-          .scale(1000)
-          .translate([width / 2, height / 2]);
+        var projection = d3.geoAlbersUsa()
+            .scale(1000)
+            .translate([width / 2, height / 2]);
 
-      var path = d3.geoPath()
-          .projection(projection);
+        var path = d3.geoPath()
+            .projection(projection);
 
-      var svg = d3.select("body").append("svg")
-          .attr("width", width)
-          .attr("height", height);
+        var svg = d3.select("body").append("svg")
+            .attr("width", width)
+            .attr("height", height);
 
-      svg.append("rect")
-          .attr("class", "background")
-          .attr("width", width)
-          .attr("height", height)
-          .on("click", reset);
+        svg.append("rect")
+            .attr("class", "background")
+            .attr("width", width)
+            .attr("height", height)
+            .on("click", reset);
 
-      var g = svg.append("g")
-      .style("stroke-width", "1.5px");
+        var g = svg.append("g")
+        .style("stroke-width", "1.5px");
 
-      var stateCodes = {},
-          statesLookup;
+        // for tooltip
+        var div = d3.select("body")
+  		    .append("div")
+      		.attr("class", "tooltip")
+      		.style("opacity", 0);
 
-      d3.json(URL, function(error, us) {
-          if (error) throw error;
+        var stateCodes = {},
+            statesLookup,
+            cities;
 
-          var data = topojson.feature(us, us.objects.states).features;
+        d3.json(URL, function(error, us) {
+            if (error) throw error;
 
-          d3.tsv(URL_STATES, function(states) {
-            statesLookup = states;
-            states.forEach(function(state) {
-              stateCodes[state.id] = state.code
-            })
+            var data = topojson.feature(us, us.objects.states).features;
 
-            g.selectAll("path")
-              .data(data)
-            .enter().append("path")
-              .attr("d", path)
-              .attr("class", "feature")
-              .attr("id", function(d, i) { return d.id; })
-              .on("click", function (d, se) {
-                  // if (se) { console.log(se) }
-                  console.log("Clicked", stateCodes[d.id]);
-                  if (active.node() === this) return reset();
-                  active.classed("active", false);
-                  active = d3.select(this).classed("active", true);
-
-                  var bounds = path.bounds(d),
-                    dx = bounds[1][0] - bounds[0][0],
-                    dy = bounds[1][1] - bounds[0][1],
-                    x = (bounds[0][0] + bounds[1][0]) / 2,
-                    y = (bounds[0][1] + bounds[1][1]) / 2,
-                    scale = .9 / Math.max(dx / width, dy / height),
-                    translate = [width / 2 - scale * x, height / 2 - scale * y];
-
-                  g.transition()
-                    .duration(750)
-                    .style("stroke-width", 1.5 / scale + "px")
-                    .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
-
-                  $('#inputState').val(stateCodes[d.id]);
-
-                  Shiny.onInputChange("selectedState", stateCodes[d.id]);
-              });
-
-            g.append("path")
-              .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
-              .attr("class", "mesh")
-              .attr("d", path);
-
-            // g.append("g")
-            //   .attr("class", "states-names")
-            g.selectAll("text")
-              .data(data)
-              .enter()
-              .append("svg:text")
-              .text(function(d){
-                return stateCodes[d.id];
+            d3.tsv(URL_STATES, function(states) {
+              statesLookup = states;
+              states.forEach(function(state) {
+                stateCodes[state.id] = state.code
               })
-              .attr("x", function(d){
-                  return path.centroid(d)[0];
-              })
-              .attr("y", function(d){
-                  return  path.centroid(d)[1];
-              })
-              .attr("text-anchor","middle")
-              .attr('fill', 'white');
-        })
-      });
 
-      function clicked(d, stateSearch) {
-          if (stateSearch) { console.log(stateSearch) };
-          console.log("Clicked", stateCodes[d.id]);
-          if (active.node() === this) return reset();
-          active.classed("active", false);
-          active = d3.select(this).classed("active", true);
+              g.selectAll("path")
+                .data(data)
+              .enter().append("path")
+                .attr("d", path)
+                .attr("class", "feature")
+                .attr("id", function(d, i) { return d.id; })
+                .on("click", function (d, se) {
+                    // if (se) { console.log(se) }
+                    console.log("Clicked", stateCodes[d.id]);
+                    if (active.node() === this) return reset();
+                    active.classed("active", false);
+                    active = d3.select(this).classed("active", true);
 
-          var bounds = path.bounds(d),
-            dx = bounds[1][0] - bounds[0][0],
-            dy = bounds[1][1] - bounds[0][1],
-            x = (bounds[0][0] + bounds[1][0]) / 2,
-            y = (bounds[0][1] + bounds[1][1]) / 2,
-            scale = .9 / Math.max(dx / width, dy / height),
-            translate = [width / 2 - scale * x, height / 2 - scale * y];
+                    var bounds = path.bounds(d),
+                      dx = bounds[1][0] - bounds[0][0],
+                      dy = bounds[1][1] - bounds[0][1],
+                      x = (bounds[0][0] + bounds[1][0]) / 2,
+                      y = (bounds[0][1] + bounds[1][1]) / 2,
+                      scale = .9 / Math.max(dx / width, dy / height),
+                      translate = [width / 2 - scale * x, height / 2 - scale * y];
 
-          g.transition()
-            .duration(750)
-            .style("stroke-width", 1.5 / scale + "px")
-            .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+                    g.transition()
+                      .duration(750)
+                      .style("stroke-width", 1.5 / scale + "px")
+                      .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
 
-          $('#inputState').val(stateCodes[d.id]);
+                    $('#inputState').val(stateCodes[d.id]);
 
-          Shiny.onInputChange("selectedState", stateCodes[d.id]);
+                    Shiny.onInputChange("selectedState", stateCodes[d.id]);
+                });
+
+              g.append("path")
+                .datum(topojson.mesh(us, us.objects.states, function(a, b) { return a !== b; }))
+                .attr("class", "mesh")
+                .attr("d", path);
+
+              // g.append("g")
+              //   .attr("class", "states-names")
+              g.selectAll("text")
+                .data(data)
+                .enter()
+                .append("svg:text")
+                .text(function(d){
+                  return stateCodes[d.id];
+                })
+                .attr("x", function(d){
+                    return path.centroid(d)[0];
+                })
+                .attr("y", function(d){
+                    return  path.centroid(d)[1];
+                })
+                .attr("text-anchor","middle")
+                .attr('fill', 'white');
+
+              g.selectAll("circle")
+                .data(locs)
+                .enter()
+                .append("circle")
+                .attr("cx", function(d) {
+                  return (projection(d.coords)) ? projection(d.coords)[0] : null;
+                })
+                .attr("cy", function(d) {
+                  return (projection(d.coords)) ? projection(d.coords)[1] : null;
+                })
+                .attr("r", function(d) {
+                  return 2;
+                })
+                  .style("fill", "rgb(217,91,67)")
+                  .style("opacity", 0.85)
+                  .on("mouseover", function(d) {
+                  	div.transition()
+                    	   .duration(100)
+                         .style("opacity", .9)
+                         .style("display", 'inline-block');
+                         div.text(d.name)
+                         .style("left", (d3.event.pageX) + "px")
+                         .style("top", (d3.event.pageY - 28) + "px");
+              	    })
+                  .on("mouseout", function (d) {
+                    div.transition()
+                      .duration(0)
+                      .style("display", 'none')
+                  })
+                  .on("click", function(d) {
+                    console.log(d.name)
+                  })
+
+          })
+        });
+
+        function clicked(d, stateSearch) {
+            if (stateSearch) { console.log(stateSearch) };
+            console.log("Clicked", stateCodes[d.id]);
+            if (active.node() === this) return reset();
+            active.classed("active", false);
+            active = d3.select(this).classed("active", true);
+
+            var bounds = path.bounds(d),
+              dx = bounds[1][0] - bounds[0][0],
+              dy = bounds[1][1] - bounds[0][1],
+              x = (bounds[0][0] + bounds[1][0]) / 2,
+              y = (bounds[0][1] + bounds[1][1]) / 2,
+              scale = .9 / Math.max(dx / width, dy / height),
+              translate = [width / 2 - scale * x, height / 2 - scale * y];
+
+            g.transition()
+              .duration(750)
+              .style("stroke-width", 1.5 / scale + "px")
+              .attr("transform", "translate(" + translate + ")scale(" + scale + ")");
+
+            $('#inputState').val(stateCodes[d.id]);
+
+            Shiny.onInputChange("selectedState", stateCodes[d.id]);
+        }
+
+        function reset() {
+            active.classed("active", false);
+            active = d3.select(null);
+
+            g.transition()
+              .duration(750)
+              .style("stroke-width", "1.5px")
+              .attr("transform", "");
+        }
+        // function onChangeInput() {
+        //   var state = $('#selected').val();
+        //   Shiny.onInputChange("selected", state);
+        // }
+        // function getCities(locations) {
+        //   console.log(locations);
+        //   cities = locations;
+        //   if (cities !== null) {
+        //     console.log('populating cities');
+        //     popCircles(locations)
+        //   }
+        // }
       }
 
-      function reset() {
-      active.classed("active", false);
-      active = d3.select(null);
-
-      g.transition()
-        .duration(750)
-        .style("stroke-width", "1.5px")
-        .attr("transform", "");
-      }
-      // function onChangeInput() {
-      //   var state = $('#selected').val();
-      //   Shiny.onInputChange("selected", state);
-      // }
 
   </script>
 
@@ -284,6 +357,8 @@
                 // Shiny.onInputChange("selectedState", id[0]['code']);
             }
         });
+
+        Shiny.addCustomMessageHandler("getCities", getCities);
       });
   </script>
 
