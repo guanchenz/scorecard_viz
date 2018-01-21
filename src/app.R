@@ -1,10 +1,11 @@
-# library(shiny)
+library(shiny)
+library(tidyverse)
+library(shinyjs)
 
 server <- (function(input, output, session) {
   # server codes
   
-  # data <- read_csv('../data/scorecard.csv')
-  scorecard <- readRDS('../data/data.Rds')
+  scorecard <- readRDS('./data.Rds')
   
   data_cleaned <- scorecard[,c('INSTNM', "STABBR", 'lat', 'lon', 'mn_earn_wne_p10',
                          'mn_earn_wne_p9', 'mn_earn_wne_p8',
