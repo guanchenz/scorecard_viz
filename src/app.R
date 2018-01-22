@@ -79,8 +79,8 @@ server <- (function(input, output, session) {
         geom_line(aes(group = INSTNM,
                       color = INSTNM == college2highlight,
                       alpha = INSTNM == college2highlight)) +
-        scale_x_continuous("Year after graduation") +
-        scale_y_continuous(paste("Earnings after graduation", level()),
+        scale_x_continuous("Year after entry") +
+        scale_y_continuous(paste("Earnings", level()),
                            labels = scales::dollar_format()) +
         scale_color_manual("",
                            labels = c("Others",
@@ -125,12 +125,12 @@ server <- (function(input, output, session) {
                          labels = c("Others",
                                     college2highlight),
                          values = c("grey", "red")) +
-      scale_alpha_discrete("",
-                           labels = c("Others", college2highlight),
-                           range=c(0.2, 1)) +
-      scale_size_discrete("",
-                          labels = c("Others", college2highlight),
-                          range=c(1, 5)) +
+      # scale_alpha_discrete("",
+      #                      labels = c("Others", college2highlight),
+      #                      range=c(0.2, 1)) +
+      # scale_size_discrete("",
+      #                     labels = c("Others", college2highlight),
+      #                     range=c(1, 5)) +
       ggtitle(paste("Percentage of students who get loans", level())) +
       theme_bw() +
       theme(legend.position = 'none',
