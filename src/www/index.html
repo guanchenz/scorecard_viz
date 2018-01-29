@@ -2,63 +2,151 @@
 <html>
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <!-- <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.indigo-pink.min.css">
+  <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script> -->
+  <link rel="stylesheet" href="./libs/material.min.css">
+  <script defer src="./libs/material.min.js"></script>
+
   <script src="shared/jquery.js" type="text/javascript"></script>
-  <!-- <script   src="https://code.jquery.com/jquery-3.2.1.slim.min.js"   integrity="sha256-k2WSCIexGzOj3Euiig+TlR8gA0EmPjuc79OEeY5L45g="   crossorigin="anonymous"></script> -->
   <script src="shared/shiny.js" type="text/javascript"></script>
   <script src="./libs/d3.v4.min.js"></script>
   <script src="./libs/topojson.v1.min.js"></script>
-  <!-- <script src="shinyjs/inject.js"></script> -->
+
   <link rel="stylesheet" type="text/css" href="shared/shiny.css" />
   <link rel="stylesheet" type="text/css" href="index.css" />
 </head>
 
 <body>
 
-  <!-- <script src="//d3js.org/d3.v4.min.js"></script>
-  <script src="//d3js.org/topojson.v1.min.js"></script> -->
+  <div class="mdl-layout mdl-js-layout">
+    <header
+      class="mdl-layout__header mdl-layout--fixed-header"
+      id="header"
+    >
+      <div class="mdl-layout__header-row">
+        <!-- Title -->
+        <span class="mdl-layout-title">Scorecard Visualizer</span>
+        <!-- Add spacer, to align navigation to the right -->
+        <div class="mdl-layout-spacer"></div>
+        <!-- Navigation. We hide it in small screens. -->
+        <nav class="mdl-navigation mdl-layout--large-screen-only">
+          <a class="mdl-navigation__link" href="https://collegescorecard.ed.gov/data/">Original data</a>
+          <a class="mdl-navigation__link" href="https://github.com/guanchenz/scorecard_viz">Source code</a>
+        </nav>
+      </div>
+    </header>
 
-  <div class="root">
-    <div class='header'>
-      <h1>Scorecard Visualizer</h1>
+    <main class="mdl-layout__content">
+
+      <div id="main">
+        <div class="map" id="map-container">
+
+          <div class="card-wide mdl-card mdl-shadow--2dp" id="card-map">
+            <div class="mdl-card__title">
+              <h5 class="mdl-card__title-text">
+                Select a state or school from the map to start
+              </h5>
+              &nbsp&nbsp&nbsp
+              <div id="tt1" class="icon material-icons">info</div>
+            </div>
+
+            <div class="mdl-card__supporting-text">
+              <input id="inputState" name="state" value="" disabled />
+              <input id="resetSelectedColleges" name="resetSelectedColleges",
+                     value="" disabled />
+
+              <!-- <input id="selected" name="selected" type="text" value=""> -->
+
+              <div class="mdl-textfield mdl-js-textfield">
+                <input class="mdl-textfield__input" type="text" id="selected" name="selected">
+                <label class="mdl-textfield__label" for="selected" id="selected-label">Enter a state</label>
+              </div>
+
+              <!-- <button id="search-state">search</button> -->
+              <button
+                class="mdl-button mdl-js-button mdl-button--raised"
+                id="search-state"
+              >
+                  Search
+              </button>
+
+              &nbsp&nbsp&nbsp
+
+              <button
+                class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent"
+                id="reset-circles"
+              >
+                  Reset selection
+              </button>
+              <svg id="map-svg"></svg>
+            </div>
+          </div>
+
+
+        </div>
+
+
+        <div class="charts" id="charts-container">
+          <!-- <svg id="line-chart"></svg> -->
+
+          <div class="chart-1">
+            <div class="card-wide mdl-card mdl-shadow--2dp">
+              <div class="mdl-card__title">
+                <p><h5 class="mdl-card__title-text">Average salaries</h5>
+                &nbsp<small>(6-10 years after entry)</small></p>
+              </div>
+              {{ plot }}
+            </div>
+
+          </div>
+
+          <div class="chart-2">
+            <div class="card-wide mdl-card mdl-shadow--2dp" id="card-chart2">
+              <div class="mdl-card__title">
+                <h5 class="mdl-card__title-text">Average cost</h5>
+              </div>
+              {{ plotCost }}
+
+              {{ plotIncome }}
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </main>
+
+    <div id="snackbar-alert" class="mdl-js-snackbar mdl-snackbar">
+      <div class="mdl-snackbar__text"></div>
+      <button class="mdl-snackbar__action" type="button"></button>
     </div>
 
-    <div class="map" id="map-container">
+    <div class="mdl-tooltip mdl-tooltip--large" data-mdl-for="tt1">
+      <span id="tooltip-info">The scorecard data contains college data in the US. This app
+      helps you explore a subset of the dataset by focusing on
+      the financial aspects of choosing a college. For further information,
+      please consult the original dataset.
 
-      <input id="inputState" name="state" value="" disabled />
+      To use this app, start by choosing a state or school on the map.
+      If you have a state in mind, search it by its abbreviation.
+      The plots on the right will show the information of your selected
+      school. If you click on the location of the schools on the map,
+      you can select multiple schools for comparison.
 
-      <!-- <input id="selected" name="selected" type="text" value="">
+      Zoom in a state by clicking on the state. Clicking it again to
+      zoom out. When you zoom in, the plots will show the data only in
+      the state. When you zoom out, they will show the data on the
+      national level.
 
-      <button id="search-state">search</button> -->
-      <p style='margin-top: 0'>Select a college or state to get started</p>
-
-      <div id="map-svg">
-        <svg id="map"></svg>
-      </div>
+      You can compare schools in the same state as well as in different
+      states.</span>
     </div>
-
-    <div class="charts" id="charts-container">
-      <!-- <svg id="line-chart"></svg> -->
-      <div id="title">
-        {{ title }}
-      </div>
-
-      <div class="chart-1">
-        {{ plot }}
-      </div>
-
-      <div class="chart-2">
-        {{ plotCost }}
-      </div>
-
-      <div class="chart-3">
-        {{ plotIncome }}
-      </div>
-
-      <div class="chart-4">
-        {{ plotCulture }}
-      </div>
-    </div>
-
   </div>
 
   <script>
@@ -66,10 +154,11 @@
           statesLookup,
           cities,
           g,
-          dataCollege;
+          dataCollege,
+          resetToggle = false,
+          colleges = [];
 
       function getCities(dataFromR) {
-        // console.log(dataFromR);
         dataCollege = dataFromR.INSTNM.map((d, idx) => (
           {
             coords: [dataFromR.lon[idx], dataFromR.lat[idx]],
@@ -81,17 +170,13 @@
             mnEarn6: dataFromR.mn_earn_wne_p6[idx]
           }
         ))
-        // console.log(dataCollege);
-        // const URL = "https://gist.githubusercontent.com/mbostock/4090846/raw/d534aba169207548a8a3d670c9c2cc719ff05c47/us.json";
-        // const URL_STATES = "https://gist.githubusercontent.com/mbostock/4090846/raw/07e73f3c2d21558489604a0bc434b3a5cf41a867/us-state-names.tsv";
         const URL = "./data/us.json";
         const URL_STATES = "./data/us-state-names.tsv";
-        // var width = 960,
-        // height = 500;
-        var width = document.getElementById('map-container').offsetWidth;
-        var height = document.getElementById('map-container').offsetHeight;
+
+        var width = document.getElementById('map-container').clientWidth;
+        var height = document.getElementById('map-container').clientHeight*.8;
         var active = d3.select(null);
-        // console.log(width, height)
+        var activeCircle = d3.selectAll(null);
 
         var projection = d3.geoAlbersUsa()
             .scale(800)
@@ -100,7 +185,7 @@
         var path = d3.geoPath()
             .projection(projection);
 
-        var svg = d3.select("#map")
+        var svg = d3.select("#map-svg")
             .attr("width", width)
             .attr("height", height);
 
@@ -112,12 +197,6 @@
 
         g = svg.append("g")
         .style("stroke-width", "1.5px");
-
-        // for tooltip
-        var div = d3.select("body")
-  		    .append("div")
-      		.attr("class", "tooltip")
-      		.style("opacity", 0);
 
 
         d3.json(URL, function(error, us) {
@@ -138,8 +217,6 @@
                 .attr("class", "feature")
                 .attr("id", function(d, i) { return d.id; })
                 .on("click", function (d, se) {
-                    // if (se) { console.log(se) }
-                    // console.log("Clicked", stateCodes[d.id]);
                     if (active.node() === this) return reset();
                     active.classed("active", false);
                     active = d3.select(this).classed("active", true);
@@ -159,6 +236,9 @@
 
                     $('#inputState').val(stateCodes[d.id]);
 
+                    $("#selected").val(stateCodes[d.id]);
+                    $("#selected-label").html("");
+
                     Shiny.onInputChange("selectedState", stateCodes[d.id]);
                 });
 
@@ -167,8 +247,6 @@
                 .attr("class", "mesh")
                 .attr("d", path);
 
-              // g.append("g")
-              //   .attr("class", "states-names")
               g.selectAll("text")
                 .data(data)
                 .enter()
@@ -186,36 +264,43 @@
                 .attr('fill', 'white')
                 .attr('font-size', "10px");
 
-              g.selectAll("circle")
-                .data(dataCollege)
-                .enter()
-                .append("circle")
-                .attr("cx", function(d) {
-                  return (projection(d.coords)) ? projection(d.coords)[0] : null;
-                })
-                .attr("cy", function(d) {
-                  return (projection(d.coords)) ? projection(d.coords)[1] : null;
-                })
-                .attr("r", function(d) {
-                  return 1.5;
-                })
-                  .style("fill", "rgb(217,91,67)")
-                  .style("opacity", 0.85)
-                  .on("mouseover", function(d) {
-                  	div.transition()
-                    	   .duration(100)
-                         .style("opacity", .9)
-                         .style("display", 'inline-block');
-                         div.text(d.name)
-                         .style("left", (d3.event.pageX) + "px")
-                         .style("top", (d3.event.pageY - 28) + "px");
-              	    })
-                  .on("mouseout", function (d) {
-                    div.transition()
-                      .duration(0)
-                      .style("display", 'none')
+              if (dataCollege) {
+                g.selectAll("circle")
+                  .data(dataCollege)
+                  .enter()
+                  .append("circle")
+                  .attr("cx", function(d) {
+                    return (projection(d.coords)) ? projection(d.coords)[0] : null;
                   })
-                  .on("click", onClickCircle)
+                  .attr("cy", function(d) {
+                    return (projection(d.coords)) ? projection(d.coords)[1] : null;
+                  })
+                  .attr("r", function(d) {
+                    return 1.5;
+                  })
+                    .style("fill", "#2196F3")
+                    .style("opacity", 0.85)
+                    .on("click", onClickCircle)
+                    .append("title")
+                      .text(function(d) {
+                        return d.name;
+                      })
+                    // .on("mouseover", function(d) {
+                    //   div.transition()
+                    //        .duration(100)
+                    //        .style("opacity", .9)
+                    //        .style("display", 'inline-block');
+                    //        div.text(d.name)
+                    //        .style("left", (d3.event.pageX) + "px")
+                    //        .style("top", (d3.event.pageY - 28) + "px");
+                    //   })
+                    // .on("mouseout", function (d) {
+                    //   div.transition()
+                    //     .duration(0)
+                    //     .style("display", 'none')
+                    // })
+
+              }
 
 
               // *************** line chart ******************
@@ -310,6 +395,7 @@
 
         });
 
+        /** click on state */
         function clicked(d, stateSearch) {
             if (stateSearch) { console.log(stateSearch) };
             console.log("Clicked", stateCodes[d.id]);
@@ -335,6 +421,7 @@
             Shiny.onInputChange("selectedState", stateCodes[d.id]);
         }
 
+        /** reset state */
         function reset() {
             active.classed("active", false);
             active = d3.select(null);
@@ -344,23 +431,39 @@
               .style("stroke-width", "1.5px")
               .attr("transform", "");
 
+              document.querySelector(".mdl-textfield").MaterialTextfield.change();
+            // $("#selected").val("");
+            $("#selected-label").html("Enter a state");
+
             Shiny.onInputChange("selectedState", null);
         }
-        // function onChangeInput() {
-        //   var state = $('#selected').val();
-        //   Shiny.onInputChange("selected", state);
-        // }
-        // function getCities(locations) {
-        //   console.log(locations);
-        //   cities = locations;
-        //   if (cities !== null) {
-        //     console.log('populating cities');
-        //     popCircles(locations)
-        //   }
-        // }
 
+        /** click on circles (schools) */
         function onClickCircle(d) {
-          Shiny.onInputChange("selectedCollege", d.name);
+          if (colleges.length < 5) {
+            colleges.push('new click');
+            d3.select(this).style("fill", "#F44336");
+            Shiny.onInputChange("selectedCollege", d.name);
+          } else {
+            showSnackbar();
+          }
+        }
+
+        function resetCircle() {
+            d3.selectAll('circile').style("fill", "#2196F3");
+        }
+
+        /** show if > 5 selected schools */
+        function showSnackbar() {
+          var snackbarContainer = document.querySelector('#snackbar-alert');
+          var handler = function(event) {};
+          var data = {
+            message: 'You can select up to 5 schools',
+            timeout: 5000,
+            actionHandler: handler,
+            actionText: 'Close'
+          };
+          snackbarContainer.MaterialSnackbar.showSnackbar(data);
         }
 
       } // end of getCities
@@ -470,7 +573,28 @@
   </script>
 
   <script>
+      function display(msg) {
+        console.log(msg)
+      }
       $(document).ready(function () {
+
+        $(document).on('shiny:connected', function(event) {
+          console.log('Connected to the server');
+        });
+
+        // $("#inputState").on('shiny:value', function(event) {
+        //   console.log(event.value);
+        // });
+
+        // $(document).on('shiny:message', function(event) {
+        //   // console.log(event.message);
+        //   if (event.hasOwnProperty('message') &&
+        //       event.message.hasOwnProperty('custom') &&
+        //       event.message.custom.hasOwnProperty('test')) {
+        //     display(event.message);
+        //   }
+        // });
+
         // $('#selected').on('input',function(e){
         //     e.preventDefault();
         //     var state = $('#selected').val();
@@ -484,23 +608,44 @@
             // e.preventDefault();
             console.log('clicked submit')
             var sc = $('#selected').val();
-            // if (sc == 'CA') {
-                // g.selectAll("path").each(function(d) {
-                //   console.log(this);
-                // })
-                var id = statesLookup.filter((s) => {
-                  return s.code === sc;
-                })
-                console.log(id);
-                $('#inputState').val(id[0]['code']);
-                g.select(`path[id = "${id[0]['id']}"]`).dispatch("click", {sc});
 
-                // Shiny.onInputChange("selectedState", id[0]['code']);
-            // }
+            var id = statesLookup.filter((s) => {
+              return s.code === sc;
+            })
+            console.log(id);
+            if (id.length <= 0) {
+              console.log("Invalid state")
+            } else {
+              $('#inputState').val(id[0]['code']);
+              g.select(`path[id = "${id[0]['id']}"]`).dispatch("click", {sc});
+
+              Shiny.onInputChange("selectedState", id[0]['code']);
+            }
         });
+
+        $("#reset-circles").click(function(e) {
+          g.selectAll('circle').style("fill", "#2196F3");
+          colleges = [];  // reset to 0
+          resetToggle = !resetToggle
+          Shiny.onInputChange("resetSelectedColleges", resetToggle);
+        })
 
         Shiny.addCustomMessageHandler("getCities", getCities);
         Shiny.addCustomMessageHandler("updateData", updateData);
+
+        Shiny.addCustomMessageHandler("stateValidation", function(state) {
+          if (state) {
+            console.log('Input is valid')
+            var id = statesLookup.filter((s) => {
+              return s.code === state;
+            })
+            $('#inputState').val(id[0]['code']);
+            g.select(`path[id = "${id[0]['id']}"]`).dispatch("click", {state});
+          } else {
+            console.log('Invalid input')
+          }
+
+        })
       });
   </script>
 
